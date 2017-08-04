@@ -1,0 +1,78 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+.grid {
+    width: 360px;
+    overflow: hidden;
+    position: absolute;
+    top: 120px;
+    left: 0
+}
+.grid-item {
+    float: left;
+    position: relative;
+    padding-right: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 7.5px 10px;
+}
+.grid-item img {
+    box-sizing: border-box;
+    pointer-events: none;
+}
+.grid-item img.wrong {
+    border: 5px solid red;
+
+}
+.grid-item img.right {
+    border: 5px solid green;
+
+}
+
+.grid-item.non-active {
+    cursor: not-allowed;
+}
+#t_guess {
+    position: absolute;
+    top: 10px;
+    left: 250px;
+}
+.walls {
+    background: #000;
+    position: absolute;
+    top: 7.5px;
+    left: 10px;
+    width: 100px;
+    height: 100px;
+    display: none;
+    pointer-events: none;
+    z-index: 10;
+}
+.hard-walls {
+    background: rgba(200,0,0,.5);
+    position: absolute;
+    top: 7.5px;
+    left: 10px;
+    width: 100px;
+    height: 100px;
+    display: none;
+    pointer-events: none;
+    z-index: 9;
+}
+#t_score {
+    position: absolute;
+    left: 372px;
+    top: 10px;
+}
+#score-right {
+    color: green;
+    font-weight: bold;
+    font-size: 30px;
+    padding: 20px;
+}
+#score-wrong {
+    color: red;
+    font-weight: bold;
+    font-size: 30px;
+    padding: 20px;
+}

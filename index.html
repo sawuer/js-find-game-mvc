@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body onload="mechanics.rendering()">
+    <div id="game">
+
+
+        <t id="t_intro">
+            <h2>Ты готов?</h2>
+            <button onclick="mechanics.startGame()"Продолжить>Начать игру</button>
+        </t>
+
+        <t id="t_start">
+
+            <t id="t_counting">
+                <h2>Старт!</h2>
+                <h1 id="counter"></h1>
+            </t>
+
+            <t id="t_score">
+                <span id="score-right">0</span>
+            </t>
+
+            <t id="t_selection">
+                <h2>Угадывай!</h2>
+            </t>
+
+            <t id="t_right">
+                <h2>Правильно)))</h2>
+                <button onclick="mechanics.startGame()" class="restart">Продолжить</button>
+            </t>
+
+            <t id="t_wrong">
+                <h2>Неправильно(((</h2>
+                <button onclick="mechanics.startGame()" class="restart">Заново</button>
+            </t>
+
+
+            <t id="t_guess">
+                <!-- Здесь картинка, которую нужно угадать -->
+            </t>
+
+
+            <t id="t_grid">
+                <div class="grid">
+                    <!-- Здесь выводятся картинки -->
+                </div>
+            </t>
+
+        </t>
+
+
+    </div>
+    <script src="scripts/domquery.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>
