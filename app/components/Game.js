@@ -1,43 +1,36 @@
 class Game {
   constructor(opt) {
-    this.start =              opt.start;
-    this.selection =          opt.selection;
-    this.grid =               opt.grid;
-    this.counting =           opt.counting;
-    this.right =              opt.right;
-    this.wrong =              opt.fawronglse;
-    this.guess =              opt.guess;
-    this.score =              opt.score;
-    this.scoreRight =         opt.scoreRight;
-    this.counter =            opt.counter;
-    this.counterConst =       opt.counterConst;
-    this.imgs =               opt.imgs;
-    this.imgsCount =          opt.imgsCount;
-    this.introTemplate =      fromDom(opt.introTemplate);
-    this.startTemplate =      fromDom(opt.startTemplate);
-    this.selectionTemplate =  fromDom(opt.selectionTemplate);
-    this.gridTemplate =       fromDom(opt.gridTemplate);
-    this.countingTemplate =   fromDom(opt.countingTemplate);
-    this.rightTemplate =      fromDom(opt.rightTemplate);
-    this.wrongTemplate =      fromDom(opt.wrongTemplate);
-    this.guessTemplate =      fromDom(opt.guessTemplate);
-    this.scoreTemplate =      fromDom(opt.scoreTemplate);
+    this.score =          true;
+    this.scoreRight =     0;
+    this.counter =        opt.counter-1;
+    this.counterConst =   this.counter;
+    this.imgs =           [];
+    this.imgsCount =      opt.imgsCount + 1;
+    this.introTemp =      fromDom(opt.introTemp);
+    this.startTemp =      fromDom(opt.startTemp);
+    this.selectionTemp =  fromDom(opt.selectionTemp);
+    this.gridTemp =       fromDom(opt.gridTemp);
+    this.countingTemp =   fromDom(opt.countingTemp);
+    this.rightTemp =      fromDom(opt.rightTemp);
+    this.wrongTemp =      fromDom(opt.wrongTemp);
+    this.guessTemp =      fromDom(opt.guessTemp);
+    this.scoreTemp =      fromDom(opt.scoreTemp);
   }
 
-  displayTemplate(boolean, template) {
-    return boolean ? template.style.display = 'block' : template.style.display = 'none';
+  displayTemp(bool, temp) {
+    return bool ? temp.style.display = 'block' 
+                : temp.style.display = 'none';
   }
 
   rendering() {
-    this.displayTemplate(!this.start, this.introTemplate);
-    this.displayTemplate(this.start, this.startTemplate);
-    this.displayTemplate(this.counting, this.countingTemplate);
-    this.displayTemplate(this.guess, this.guessTemplate);
-    this.displayTemplate(this.grid, this.gridTemplate);
-    this.displayTemplate(this.selection, this.selectionTemplate);
-    this.displayTemplate(this.right, this.rightTemplate);
-    this.displayTemplate(this.wrong, this.wrongTemplate);
-    this.displayTemplate(this.score, this.scoreTemplate);
+    this.displayTemp(!this.start, this.introTemp);
+    this.displayTemp(this.countingShow, this.countingTemp);
+    this.displayTemp(this.guessShow, this.guessTemp);
+    this.displayTemp(this.grid, this.gridTemp);
+    this.displayTemp(this.selectionShow, this.selectionTemp);
+    this.displayTemp(this.right, this.rightTemp);
+    this.displayTemp(this.wrong, this.wrongTemp);
+    this.displayTemp(this.score, this.scoreTemp);
   }
 
   randomizer(min,max) {
@@ -54,6 +47,9 @@ class Game {
 
   startGame() {
     var that = this;
+    var scoreRight = this.scoreTemp.querySelector('#score-right');
+    var grid = this.gridTemp.querySelector('.grid');
+    var counter = this.countingTemp.querySelector('#counter');
 
     function addImgToArray(array) {
       do {
@@ -62,7 +58,6 @@ class Game {
         if(arrIndexOfRand != randomNum) {
           that.isSame = true;
           array.unshift(randomNum);
-          console.log('add');
           return;
         }
       } while (arrIndexOfRand == randomNum);   
@@ -71,8 +66,13 @@ class Game {
     // Ширина контейнера в зависимости от кол-ва картинок
     function containerWidth(array) {
       if(array.length > 9) {
-        fromDom('.grid').style.width = '480px';
+        grid.style.width = '480px';
       }
+    }
+
+    // Перемешка для аррэя
+    function arrShuffle() {
+      return Math.random();
     }
 
     // Инициалзиация счетчика
@@ -91,22 +91,22 @@ class Game {
     }
 
     this.counter += 1;
-    fromDom('#score-right').innerHTML = this.scoreRight;
-    this.gridTemplate.querySelector('.grid').innerHTML = ''; // Удаляем все картинки
     this.start = true;
-    this.counting = true;
+    this.countingShow = true;
     this.grid = true;
-    this.selection = false;
+    this.selectionShow = false;
     this.right = false;
     this.wrong = false;
-    this.guess = false;
+    this.guessShow = false;
     this.rendering();
+    grid.innerHTML = '';
+    scoreRight.innerHTML = this.scoreRight;
     addImgToArray(this.imgs);
     containerWidth(this.imgs);
+    counterInit(counter, this.counter);
 
-    // Перетасовка массива и отрисовка
-    this.imgs.sort((x, y) => Math.random()).forEach(i => {
-      this.gridTemplate.querySelector('.grid').innerHTML += `
+    this.imgs.sort(arrShuffle).forEach(i => {
+      grid.innerHTML += `
         <div class="grid-item" data-img="${i}">
           <img src="img/${i}.jpg">
           <div class="walls"></div>
@@ -115,43 +115,38 @@ class Game {
       `;
     });
 
-    // Изменения курсора
+    // Превент курсора для картинок
     fromDom('.grid-item').forEach(i => 
       i.classList.add('non-active'));
-
-    // Задаем значение счетчику и отнимаем по одной единице
-    counterInit(this.startTemplate.querySelector('#counter'), this.counter);
   }
 
   selections() {
-    this.counting = false;
-    this.selection = true;
-    this.guess = true;
-    this.rendering(); // Отрисовка
-    this.random(); // Исполняем рандомную картинку
-    fromDom('.grid-item').forEach(i => 
-      i.classList.remove('non-active'));
-    fromDom('.walls').forEach(i => 
-      i.style.display = 'block');
+    this.countingShow = false;
+    this.selectionShow = true;
+    this.guessShow = true;
+    this.rendering();
+    this.imageThatNeedGuess(); 
+    fromDom('.grid-item').forEach(i => i.classList.remove('non-active'));
+    fromDom('.walls').forEach(i => i.style.display = 'block');
   }
 
-  random() {
-    var rand = (min,max) => ~~(Math.random() * (max - min)) + min;
-    // Рандомное число из количества картинок
-    var randEl = rand(this.imgs[rand(0, this.imgs.length)]);
-    fromDom('#t_guess').innerHTML = `<img data-guess="${randEl}" src="img/${randEl}.jpg">`;
+  imageThatNeedGuess() {
+    var randNum = this.randomizer(0, this.imgs.length);
+    var randImg = this.imgs[randNum];
+    var html = `<img data-guess="${randImg}" 
+                src="img/${randImg}.jpg">`;
+    fromDom('#t_guess').innerHTML = html;
     this.select();
   }
 
   select() {
-    fromDom('.hard-walls').forEach(i => 
-      i.style.display = 'none');
-    // Число для угадывания
-    var guess = fromDom('#t_guess').querySelector('img').getAttribute('data-guess');
-    fromDom('.grid-item').forEach(i => {
-      i.addEventListener('click', (e) => {
+    var selectedImg = fromDom('#t_guess').querySelector('img').getAttribute('data-guess');
+    var gridItem = fromDom('.grid-item');
+    var rightAnswerWall = fromDom(`[data-img="${selectedImg}"]`).querySelector('.walls');
 
-        if(e.target.getAttribute('data-img') === guess) { // Если правильный ответ
+    gridItem.forEach(i => {
+      i.addEventListener('click', (e) => {
+        if(e.target.getAttribute('data-img') === selectedImg) { 
           this.right = true;
           this.wrong = false;
           this.scoreRight++;
@@ -163,15 +158,14 @@ class Game {
           this.imgs.unshift(this.randomFirstImg());
           this.counter = this.counterConst;
         }
-        this.selection = false; // Убираем шаблон выбора
-        // Преврентим события по клику на картинках
-        fromDom('.grid-item').forEach(i => i.style.pointerEvents = 'none');
+        this.selectionShow = false;
+        gridItem.forEach(i => i.style.pointerEvents = 'none');
         this.rendering();
-        // Убираем крышку у правильного ответа
-        fromDom(`[data-img="${guess}"]`).querySelector('.walls').style.display = 'none';
+        rightAnswerWall.style.display = 'none';
       });
     });
   }
+
 }
 
 
