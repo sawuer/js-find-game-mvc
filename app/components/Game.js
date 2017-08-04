@@ -1,6 +1,5 @@
 class Game {
   constructor(opt) {
-    this.score =          true;
     this.scoreRight =     0;
     this.counter =        opt.counter-1;
     this.counterConst =   this.counter;
@@ -89,7 +88,8 @@ class Game {
         that.selections(); // Скрываем картинки и начинаем выбирать
       }, counterData * 1000);
     }
-
+    
+    this.score = true;
     this.counter += 1;
     this.start = true;
     this.countingShow = true;
