@@ -1,17 +1,18 @@
 class Game {
   constructor(opt) {
-    this.start =         opt.start;
-    this.selection =     opt.selection;
-    this.grid =          opt.grid;
-    this.counting =      opt.counting;
-    this.right =         opt.right;
-    this.wrong =         opt.fawronglse;
-    this.guess =         opt.guess;
-    this.score =         opt.score;
-    this.scoreRight =    opt.scoreRight;
-    this.counter =       opt.counter;
-    this.counterConst =  opt.counterConst;
-    this.imgs =          opt.imgs;
+    this.start =              opt.start;
+    this.selection =          opt.selection;
+    this.grid =               opt.grid;
+    this.counting =           opt.counting;
+    this.right =              opt.right;
+    this.wrong =              opt.fawronglse;
+    this.guess =              opt.guess;
+    this.score =              opt.score;
+    this.scoreRight =         opt.scoreRight;
+    this.counter =            opt.counter;
+    this.counterConst =       opt.counterConst;
+    this.imgs =               opt.imgs;
+    this.imgsCount =          opt.imgsCount;
     this.introTemplate =      fromDom(opt.introTemplate);
     this.startTemplate =      fromDom(opt.startTemplate);
     this.selectionTemplate =  fromDom(opt.selectionTemplate);
@@ -44,7 +45,7 @@ class Game {
   }
 
   randomFirstImg() {
-    return this.randomizer(1, 30);
+    return this.randomizer(1, this.imgsCount);
   }
   
   addImagesToArray() {
@@ -55,16 +56,16 @@ class Game {
     var that = this;
 
     function addImgToArray(array) {
-      var randomNum = that.randomizer(1, 8);
-      for(var i = 0; i <= array.length; i++) {
-        if(randomNum == array[i]) {
-          if(array.length == 1) {
-            array.unshift(randomNum + 1);
-          }
+      do {
+        var randomNum = that.randomizer(1, that.imgsCount);
+        var arrIndexOfRand = array[array.indexOf(randomNum)];
+        if(arrIndexOfRand != randomNum) {
+          that.isSame = true;
+          array.unshift(randomNum);
+          console.log('add');
           return;
         }
-      }
-      array.unshift(randomNum);
+      } while (arrIndexOfRand == randomNum);   
     }
 
     // Ширина контейнера в зависимости от кол-ва картинок
@@ -73,7 +74,6 @@ class Game {
         fromDom('.grid').style.width = '480px';
       }
     }
-
 
     // Инициалзиация счетчика
     function counterInit(htmlCounter, counterData) {
