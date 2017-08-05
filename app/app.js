@@ -1,8 +1,9 @@
 const App = inDom('#app');
 
-App.innerHTML = GameView;
-
+App.innerHTML = Game.view;
 
 Game.init();
+
+
 
 
