@@ -1,61 +1,58 @@
-class Game {
-  constructor(opt) {
-    this.scoreRight =     0;
-    this.counter =        opt.counter-1;
-    this.counterConst =   this.counter;
-    this.imgs =           [];
-    this.imgsCount =      opt.imgsCount + 1;
-    this.introTemp =      fromDom(opt.introTemp);
-    this.startTemp =      fromDom(opt.startTemp);
-    this.selectionTemp =  fromDom(opt.selectionTemp);
-    this.gridTemp =       fromDom(opt.gridTemp);
-    this.countingTemp =   fromDom(opt.countingTemp);
-    this.rightTemp =      fromDom(opt.rightTemp);
-    this.wrongTemp =      fromDom(opt.wrongTemp);
-    this.guessTemp =      fromDom(opt.guessTemp);
-    this.scoreTemp =      fromDom(opt.scoreTemp);
+var Game = function(){
+  var data = {
+    scoreRight:     0,
+    counter:        0,
+    imgs:           [],
+    imgsCount:      30,
+    introTemp:      '#t_intro',
+    startTemp:      '#t_start',
+    selectionTemp:  '#t_selection',
+    gridTemp:       '#t_grid',
+    countingTemp:   '#t_counting',
+    rightTemp:      '#t_right',
+    wrongTemp:      '#t_wrong',
+    guessTemp:      '#t_guess',
+    scoreTemp:      '#t_score',
   }
 
-  displayTemp(bool, temp) {
-    return bool ? temp.style.display = 'block' 
-                : temp.style.display = 'none';
+  function rendering() {
+    displayTemp(!data.start, data.introTemp);
+    displayTemp(data.countingShow, data.countingTemp);
+    displayTemp(data.guessShow, data.guessTemp);
+    displayTemp(data.grid, data.gridTemp);
+    displayTemp(data.selectionShow, data.selectionTemp);
+    displayTemp(data.right, data.rightTemp);
+    displayTemp(data.wrong, data.wrongTemp);
+    displayTemp(data.score, data.scoreTemp);
   }
 
-  rendering() {
-    this.displayTemp(!this.start, this.introTemp);
-    this.displayTemp(this.countingShow, this.countingTemp);
-    this.displayTemp(this.guessShow, this.guessTemp);
-    this.displayTemp(this.grid, this.gridTemp);
-    this.displayTemp(this.selectionShow, this.selectionTemp);
-    this.displayTemp(this.right, this.rightTemp);
-    this.displayTemp(this.wrong, this.wrongTemp);
-    this.displayTemp(this.score, this.scoreTemp);
+  function displayTemp(bool, temp) {
+    return bool ? inDom(temp).style.display = 'block' : inDom(temp).style.display = 'none';
   }
 
-  randomizer(min,max) {
+  function randomizer(min,max) {
     return ~~(Math.random() * (max - min)) + min;
   }
 
-  randomFirstImg() {
-    return this.randomizer(1, this.imgsCount);
+  function randomFirstImg() {
+    return randomizer(1, data.imgsCount);
   }
   
-  addImagesToArray() {
-    this.imgs.unshift(this.randomFirstImg());
+
+  function addImagesToArray() {
+    data.imgs.unshift(randomFirstImg());
   }
 
-  startGame() {
-    var that = this;
-    var scoreRight = this.scoreTemp.querySelector('#score-right');
-    var grid = this.gridTemp.querySelector('.grid');
-    var counter = this.countingTemp.querySelector('#counter');
+  function startGame() {
+    var scoreRight = inDom(data.scoreTemp).querySelector('#score-right');
+    var grid = inDom(data.gridTemp).querySelector('.grid');
+    var counter = inDom(data.countingTemp).querySelector('#counter');
 
     function addImgToArray(array) {
       do {
-        var randomNum = that.randomizer(1, that.imgsCount);
+        var randomNum = randomizer(1, data.imgsCount);
         var arrIndexOfRand = array[array.indexOf(randomNum)];
         if(arrIndexOfRand != randomNum) {
-          that.isSame = true;
           array.unshift(randomNum);
           return;
         }
@@ -85,27 +82,27 @@ class Game {
       }, 1000);
       setTimeout(() => {
         clearInterval(counterInterval);
-        that.selections(); // Скрываем картинки и начинаем выбирать
+        selections(); // Скрываем картинки и начинаем выбирать
       }, counterData * 1000);
     }
     
-    this.score = true;
-    this.counter += 1;
-    this.start = true;
-    this.countingShow = true;
-    this.grid = true;
-    this.selectionShow = false;
-    this.right = false;
-    this.wrong = false;
-    this.guessShow = false;
-    this.rendering();
+    data.score = true;
+    data.counter += 1;
+    data.start = true;
+    data.countingShow = true;
+    data.grid = true;
+    data.selectionShow = false;
+    data.right = false;
+    data.wrong = false;
+    data.guessShow = false;
     grid.innerHTML = '';
-    scoreRight.innerHTML = this.scoreRight;
-    addImgToArray(this.imgs);
-    containerWidth(this.imgs);
-    counterInit(counter, this.counter);
+    scoreRight.innerHTML = data.scoreRight;
+    addImgToArray(data.imgs);
+    containerWidth(data.imgs);
+    counterInit(counter, data.counter);
+    rendering();
 
-    this.imgs.sort(arrShuffle).forEach(i => {
+    data.imgs.sort(arrShuffle).forEach(i => {
       grid.innerHTML += `
         <div class="grid-item" data-img="${i}">
           <img src="img/${i}.jpg">
@@ -116,56 +113,60 @@ class Game {
     });
 
     // Превент курсора для картинок
-    fromDom('.grid-item').forEach(i => 
-      i.classList.add('non-active'));
+    inDom('.grid-item').forEach(i => i.classList.add('non-active'));
   }
 
-  selections() {
-    this.countingShow = false;
-    this.selectionShow = true;
-    this.guessShow = true;
-    this.rendering();
-    this.imageThatNeedGuess(); 
-    fromDom('.grid-item').forEach(i => i.classList.remove('non-active'));
-    fromDom('.walls').forEach(i => i.style.display = 'block');
+  function selections() {
+    data.countingShow = false;
+    data.selectionShow = true;
+    data.guessShow = true;
+    rendering();
+    imageThatNeedGuess(); 
+    inDom('.grid-item').forEach(i => i.classList.remove('non-active'));
+    inDom('.walls').forEach(i => i.style.display = 'block');
   }
 
-  imageThatNeedGuess() {
-    var randNum = this.randomizer(0, this.imgs.length);
-    var randImg = this.imgs[randNum];
-    var html = `<img data-guess="${randImg}" 
-                src="img/${randImg}.jpg">`;
-    fromDom('#t_guess').innerHTML = html;
-    this.select();
+  function imageThatNeedGuess() {
+    var randNum = randomizer(0, data.imgs.length);
+    var randImg = data.imgs[randNum];
+    var html = `<img data-guess="${randImg}" src="img/${randImg}.jpg">`;
+    inDom('#t_guess').innerHTML = html;
+    select();
   }
 
-  select() {
-    var selectedImg = fromDom('#t_guess').querySelector('img').getAttribute('data-guess');
-    var gridItem = fromDom('.grid-item');
-    var rightAnswerWall = fromDom(`[data-img="${selectedImg}"]`).querySelector('.walls');
+  function select() {
+    var selectedImg = inDom('#t_guess').querySelector('img').getAttribute('data-guess');
+    var gridItem = inDom('.grid-item');
+    var rightAnswerWall = inDom(`[data-img="${selectedImg}"]`).querySelector('.walls');
 
     gridItem.forEach(i => {
       i.addEventListener('click', (e) => {
         if(e.target.getAttribute('data-img') === selectedImg) { 
-          this.right = true;
-          this.wrong = false;
-          this.scoreRight++;
+          data.right = true;
+          data.wrong = false;
+          data.scoreRight++;
         } else { 
-          this.wrong = true;
-          this.right = false;
-          this.scoreRight = 0;
-          this.imgs = [];
-          this.imgs.unshift(this.randomFirstImg());
-          this.counter = this.counterConst;
+          data.wrong = true;
+          data.right = false;
+          data.scoreRight = 0;
+          data.imgs = [];
+          data.imgs.unshift(randomFirstImg());
+          data.counter = 0;
         }
-        this.selectionShow = false;
+        data.selectionShow = false;
         gridItem.forEach(i => i.style.pointerEvents = 'none');
-        this.rendering();
+        rendering();
         rightAnswerWall.style.display = 'none';
       });
     });
   }
 
-}
+  return {
+    rendering,
+    addImagesToArray,
+    startGame
+  }
+
+}();
 
 

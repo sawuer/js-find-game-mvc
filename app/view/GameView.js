@@ -1,7 +1,7 @@
-fromDom('#app').innerHTML = `
+var GameView = `
   <t id="t_intro">
     <h2>Ты готов?</h2>
-    <button onclick="app.startGame()"Продолжить>Начать игру</button>
+    <button onclick="Game.startGame()"Продолжить>Начать игру</button>
   </t>
 
   <t id="t_start">
@@ -21,12 +21,12 @@ fromDom('#app').innerHTML = `
 
     <t id="t_right">
       <h2>Правильно)))</h2>
-      <button onclick="app.startGame()" class="restart">Продолжить</button>
+      <button onclick="Game.startGame()" class="restart">Продолжить</button>
     </t>
 
     <t id="t_wrong">
       <h2>Неправильно(((</h2>
-      <button onclick="app.startGame()" class="restart">Заново</button>
+      <button onclick="Game.startGame()" class="restart">Заново</button>
     </t>
 
     <t id="t_guess"></t>
