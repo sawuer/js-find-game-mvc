@@ -1,169 +1,232 @@
-var Game = function(){
-  var data = {
-    scoreRight:     0,
-    counter:        0,
-    imgs:           [],
-    imgsCount:      30,
-    introTemp:      '#t_intro',
-    startTemp:      '#t_start',
-    selectionTemp:  '#t_selection',
-    gridTemp:       '#t_grid',
-    countingTemp:   '#t_counting',
-    rightTemp:      '#t_right',
-    wrongTemp:      '#t_wrong',
-    guessTemp:      '#t_guess',
-    scoreTemp:      '#t_score',
+/**
+ * Js find game MVC version
+ */
+
+var Game = (function() {
+  // Dom query like Jquery dollar sign
+  function $(el) {
+    var all = document.querySelectorAll(el);
+    return all.length > 1 ? all : document.querySelector(el);
   }
 
-  function rendering() {
-    view(!data.start, data.introTemp);
-    view(data.countingShow, data.countingTemp);
-    view(data.guessShow, data.guessTemp);
-    view(data.grid, data.gridTemp);
-    view(data.selectionShow, data.selectionTemp);
-    view(data.right, data.rightTemp);
-    view(data.wrong, data.wrongTemp);
-    view(data.score, data.scoreTemp);
-  }
+  /* ------------------- Model ------------------- */
+  var Model = (function() {
 
-  function view(bool, temp) {
-    return bool ? inDom(temp).style.display = 'block' : inDom(temp).style.display = 'none';
-  }
-
-  function randomizer(min,max) {
-    return ~~(Math.random() * (max - min)) + min;
-  }
-
-  function randomFirstImg() {
-    return randomizer(1, data.imgsCount);
-  }
-
-  function addFirstImages() {
-    data.imgs.unshift(randomFirstImg());
-  }
-
-  function startGame() {
-    function addImgToArray(array) {
-      do {
-        var randomNum = randomizer(1, data.imgsCount);
-        var arrIndexOfRand = array[array.indexOf(randomNum)];
-        if(arrIndexOfRand != randomNum) {
-          array.unshift(randomNum);
-          return;
-        }
-      } while (arrIndexOfRand == randomNum);   
+    // private functions -------------------
+    function randomizer(min,max) {
+      return ~~(Math.random() * (max - min)) + min;
     }
 
-    function divWidthDependingOnImgs(array) {
-      if(array.length > 9) {
-        inDom('.grid').style.width = '480px';
+    function randomFirstImg(count) {
+      return randomizer(1, count);
+    }
+    // end of private functions -------------------
+
+    // Public data (3) - (data, addFirstImage(), startGame())
+    return {
+      data: {
+        scoreRight: 0,
+        counter:    0,
+        imgs:       [],
+        imgsCount:  30,
+      },
+
+      addFirstImage() {
+        var that = this;
+        that.data.imgs.unshift(randomFirstImg(that.data.imgsCount));
+      },
+
+      startGame() {
+        var that = this;
+
+        function divWidthDependingOnImgs(array) {
+          if(array.length > 9) {
+            $('.grid').style.width = '480px';
+          }
+        }
+
+        function addImgToArray(array, count) {
+          do {
+            var randomNum = randomizer(1, count);
+            var arrIndexOfRand = array[array.indexOf(randomNum)];
+            if (arrIndexOfRand != randomNum) {
+              array.unshift(randomNum);
+              return;
+            }
+          } while (arrIndexOfRand == randomNum);   
+        }
+
+        function counterInit(htmlCounter, counterData) {
+          var count = htmlCounter.innerText = counterData;
+          htmlCounter.innerText = count--;
+          var counterInterval = setInterval(() => {
+            if(htmlCounter.innerText > 0) {
+              htmlCounter.innerText = count--;
+            }
+          }, 1000);
+          setTimeout(() => {
+            clearInterval(counterInterval);
+            selections();
+          }, counterData * 1000);
+        }
+
+        function addImgToTheGrid(arr) {
+          arr.sort((a,b) => Math.random()).forEach(i => {
+            $('.grid').innerHTML += `
+              <div class="grid-item" data-img="${i}">
+                <img src="img/${i}.jpg">
+                <div class="walls"></div>
+                <div class="hard-walls"></div>
+              </div>
+            `;
+          });
+        }
+
+        function selections() {
+          that.data.countingShow = false;
+          that.data.selectionShow = true;
+          that.data.guessShow = true;
+          Controller.renderingController();
+          imageThatNeedGuess(); 
+          $('.grid-item').forEach(i => i.classList.remove('non-active'));
+          $('.walls').forEach(i => i.style.display = 'block');
+        }
+
+        function imageThatNeedGuess() {
+          var randImg = that.data.imgs[randomizer(0, that.data.imgs.length)];
+          var html = `<img data-guess="${randImg}" src="img/${randImg}.jpg">`;
+          $('#t_guess').innerHTML = html;
+          select();
+        }
+        
+        function select() {
+          var selectedImg = $('#t_guess').querySelector('img').getAttribute('data-guess');
+          var rightAnswerWall = $(`[data-img="${selectedImg}"]`).querySelector('.walls');
+          $('.grid-item').forEach(i => {
+            i.onclick = (e) => {
+              if(e.target.getAttribute('data-img') === selectedImg) { 
+                that.data.right = true;
+                that.data.wrong = false;
+                that.data.scoreRight++;
+              } else { 
+                that.data.wrong = true;
+                that.data.right = false;
+                that.data.scoreRight = 0;
+                that.data.imgs = [];
+                that.data.imgs.unshift(randomFirstImg());
+                that.data.counter = 0;
+              }
+              that.data.selectionShow = false;
+              $('.grid-item').forEach(i => i.style.pointerEvents = 'none');
+              Controller.renderingController();
+              rightAnswerWall.style.display = 'none';
+            }
+          });
+        }
+        // Init settings
+        this.data.score = true;
+        this.data.counter += 1;
+        this.data.start = true;
+        this.data.countingShow = true;
+        this.data.grid = true;
+        this.data.selectionShow = false;
+        this.data.right = false;
+        this.data.wrong = false;
+        this.data.guessShow = false;
+        $('.grid').innerHTML = '';
+        $('#score-right').innerHTML = this.data.scoreRight;
+        addImgToArray(this.data.imgs, this.data.imgsCount);
+        divWidthDependingOnImgs(this.data.imgs);
+        Controller.renderingController();
+        counterInit($('#counter'), this.data.counter);
+        addImgToTheGrid(this.data.imgs)
+        $('.grid-item').forEach(i => i.classList.add('non-active'));
+
       }
     }
+  }());
+  /* ------------------- End of Model ------------------- */
 
-    function arrayShuffle() {
-      return Math.random();
+
+
+
+
+
+  /* ------------------- View ------------------- */
+  var View = (function() {
+    // Public data
+    return {
+      temp: {
+        introTemp:      '#t_intro',
+        startTemp:      '#t_start',
+        selectionTemp:  '#t_selection',
+        gridTemp:       '#t_grid',
+        countingTemp:   '#t_counting',
+        rightTemp:      '#t_right',
+        wrongTemp:      '#t_wrong',
+        guessTemp:      '#t_guess',
+        scoreTemp:      '#t_score'
+      },
+      display(bool, t) {
+        if (bool) $(t).style.display = 'block'
+        else $(t).style.display = 'none';
+      }
     }
+  }());
+  /* ------------------- End of View ------------------- */
 
-    function prevenImgCursor(el) {
-      inDom(el).forEach(i => i.classList.add('non-active'));
+
+
+
+
+
+  /* ------------------- Controller ------------------- */
+  var Controller = (function() {
+    // Public data (3) - (renderingController(), startGameController(), addFirstImageController())
+    return {
+      renderingController() {
+        View.display(!Model.data.start, View.temp.introTemp);
+        View.display(Model.data.countingShow, View.temp.countingTemp);
+        View.display(Model.data.guessShow, View.temp.guessTemp);
+        View.display(Model.data.grid, View.temp.gridTemp);
+        View.display(Model.data.selectionShow, View.temp.selectionTemp);
+        View.display(Model.data.right, View.temp.rightTemp);
+        View.display(Model.data.wrong, View.temp.wrongTemp);
+        View.display(Model.data.score, View.temp.scoreTemp);
+      },
+      startGameController() {
+        Model.startGame();
+      },
+      addFirstImageController() {
+        Model.addFirstImage();
+      }
     }
+  }());
+  /* ------------------- End of Controller ------------------- */
 
-    function counterInit(htmlCounter, counterData) {
-      var count = htmlCounter.innerText = counterData;
-      htmlCounter.innerText = count--;
-      var counterInterval = setInterval(() => {
-        if(htmlCounter.innerText > 0) {
-          htmlCounter.innerText = count--;
-        }
-      }, 1000);
-      setTimeout(() => {
-        clearInterval(counterInterval);
-        selections(); // Скрываем картинки и начинаем выбирать
-      }, counterData * 1000);
-    }
 
-    function addImgToTheGrid(arr) {
-      arr.sort(arrayShuffle).forEach(i => {
-        inDom('.grid').innerHTML += `
-          <div class="grid-item" data-img="${i}">
-            <img src="img/${i}.jpg">
-            <div class="walls"></div>
-            <div class="hard-walls"></div>
-          </div>
-        `;
-      });
-    }
 
-    data.score = true;
-    data.counter += 1;
-    data.start = true;
-    data.countingShow = true;
-    data.grid = true;
-    data.selectionShow = false;
-    data.right = false;
-    data.wrong = false;
-    data.guessShow = false;
-    inDom('.grid').innerHTML = '';
-    inDom('#score-right').innerHTML = data.scoreRight;
-    addImgToArray(data.imgs);
-    divWidthDependingOnImgs(data.imgs);
-    rendering();
-    counterInit(inDom('#counter'), data.counter);
-    addImgToTheGrid(data.imgs)
-    prevenImgCursor('.grid-item');
-  }
 
-  function selections() {
-    data.countingShow = false;
-    data.selectionShow = true;
-    data.guessShow = true;
-    rendering();
-    imageThatNeedGuess(); 
-    inDom('.grid-item').forEach(i => i.classList.remove('non-active'));
-    inDom('.walls').forEach(i => i.style.display = 'block');
-  }
 
-  function imageThatNeedGuess() {
-    var randImg = data.imgs[randomizer(0, data.imgs.length)];
-    var html = `<img data-guess="${randImg}" src="img/${randImg}.jpg">`;
-    inDom('#t_guess').innerHTML = html;
-    select();
-  }
-
-  function select() {
-    var selectedImg = inDom('#t_guess').querySelector('img').getAttribute('data-guess');
-    var rightAnswerWall = inDom(`[data-img="${selectedImg}"]`).querySelector('.walls');
-
-    inDom('.grid-item').forEach(i => {
-      i.addEventListener('click', (e) => {
-        if(e.target.getAttribute('data-img') === selectedImg) { 
-          data.right = true;
-          data.wrong = false;
-          data.scoreRight++;
-        } else { 
-          data.wrong = true;
-          data.right = false;
-          data.scoreRight = 0;
-          data.imgs = [];
-          data.imgs.unshift(randomFirstImg());
-          data.counter = 0;
-        }
-        data.selectionShow = false;
-        inDom('.grid-item').forEach(i => i.style.pointerEvents = 'none');
-        rendering();
-        rightAnswerWall.style.display = 'none';
-      });
-    });
-  }
-
+  // Game public object App
   return {
-    startGame,
-    init() {
-      rendering();
-      addFirstImages()
-    }
+    App: (function() {
+      // Public data
+      return {
+        start() {
+          Controller.startGameController();
+        },
+
+        init() {
+          Controller.renderingController();
+          Controller.addFirstImageController();
+        }
+      }
+    }())
   }
 
-}();
+
+
+}());
 
 

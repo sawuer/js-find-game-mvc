@@ -1,8 +1,8 @@
-const App = inDom('#app');
+// View
+document.getElementById('app').innerHTML = Game.view;
 
-App.innerHTML = Game.view;
-
-Game.init();
+// App init
+Game.App.init();
 
 
 
