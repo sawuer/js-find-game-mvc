@@ -1,2 +1,2 @@
-# js-find-game
-Guess Game via Javascript
+# js-find-game-mvc
+Guess Game via Javascript using MVC pattern
